@@ -1,0 +1,7 @@
+{
+  "name": "@repo/common",
+  "version": "1.0.0",
+  "exports": {
+    "./language" : "./src/language.ts" 
+  }
+}

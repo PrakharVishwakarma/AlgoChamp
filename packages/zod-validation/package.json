@@ -1,0 +1,12 @@
+{
+  "name": "@repo/zod-validation",
+  "version": "1.0.0",
+  "exports": {
+    "./userValidation": "./src/UserValidation.ts",
+    "./submissioninputValidation" : "./src/SubmissioninputValidation.ts",
+    "./submissionCallback" : "./src/SubmissionCallback.ts" 
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  }
+}
