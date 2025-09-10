@@ -6,8 +6,8 @@ use std::str::FromStr;
 fn main() {
 	let stdin = io::stdin();
 	let mut input = stdin.lock().lines().map(|l| l.unwrap());
-	let num1: i32 = input.next().unwrap().parse().unwrap();
-	let num2: i32 = input.next().unwrap().parse().unwrap();
-	let result = twoSum(num1, num2);
+	let size_nums: usize = input.next().unwrap().parse().unwrap();
+	let nums: Vec<i32> = input.take(size_nums).map(|s| s.parse().unwrap()).collect();
+	let result = maxElementSum(nums);
 	println!("{}", result);
 }

@@ -7,13 +7,14 @@
 ##USER_CODE_HERE##
 
 int main() {
-		int num1;
-	std::cin >> num1;
+	int size_nums;
+		std::cin >> size_nums;
+		vector<int> nums(size_nums);
+		for(int i = 0; i < size_nums; i++) {
+			std::cin >> nums[i];
+		}
 
-		int num2;
-	std::cin >> num2;
-
-	int result = twoSum(num1, num2);
+	int result = maxElementSum(nums);
 	std::cout << result << std::endl;
 	return 0;
 }

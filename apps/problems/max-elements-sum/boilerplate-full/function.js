@@ -3,7 +3,7 @@
 
 const input = require("fs").readFileSync('/dev/stdin', 'utf8').trim().split("\n").join(" ").split(" ");
         
-const num1 = parseInt(input.shift());
-const num2 = parseInt(input.shift());
-const result = twoSum(num1, num2);
+const size_nums = parseInt(input.shift());
+const nums = input.splice(0, size_nums).map(Number);
+const result = maxElementSum(nums);
 console.log(result);

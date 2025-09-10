@@ -6,7 +6,7 @@ export class ProblemDefinitionParser {
     inputFields: { type: string, name: string }[] = [];
     outputFields: { type: string, name: string }[] = [];
 
-    parse(input: string) {
+    parse(input: string): void {
         const lines = input.split("\n").map(line => line.trim());
 
         let currentSection: string | null = null;
@@ -38,6 +38,16 @@ export class ProblemDefinitionParser {
         })
     }
 
+
+    validate() {
+        if (!this.functionName) {
+            throw new Error("Parsing Error: 'Function Name' not found in Structure.md.");
+        }
+        if (this.outputFields.length === 0) {
+            throw new Error("Parsing Error: At least one 'Output Field' is required in Structure.md.");
+        }
+    }
+
     extractQuotedValue(line: string): string {
         const match = line.match(/: "(.*)"$/);
         return match ? match[1] : "";
@@ -54,9 +64,9 @@ export class ProblemDefinitionParser {
     }
 
     generateCpp(): string {
-        const inputs = this.inputFields.map(field => `${field.type} ${field.name}`).join(", ");
+        const inputs = this.inputFields.map(field => `${this.mapTypeToCpp(field.type)} ${field.name}`).join(", ");
 
-        return `${this.outputFields[0].type} ${this.functionName}(${inputs}) {\n    // Write your code here\n   return result;\n}`;
+        return `${this.mapTypeToCpp(this.outputFields[0].type)} ${this.functionName}(${inputs}) {\n    // Write your code here\n   return result;\n}`;
     }
 
     generateJs(): string {
@@ -71,6 +81,42 @@ export class ProblemDefinitionParser {
         const outputType = this.mapTypeToRust(this.outputFields[0].type);
 
         return `fn ${this.functionName}(${inputs}) -> ${outputType} {\n    // Write your code here\n   return result;\n}`;
+    }
+
+
+    mapTypeToCpp(type: string): string {
+        switch (type) {
+            case "int":
+                return "int";
+            case "float":
+                return "double";
+            case "long":
+                return "long";
+            case "double":
+                return "double";
+            case "string":
+                return "string";
+            case "char":
+                return "char";
+            case "bool":
+                return "bool";
+            case "list<int>":
+                return "vector<int>";
+            case "list<float>":
+                return "vector<double>";
+            case "list<long>":
+                return "vector<long>";
+            case "list<double>":
+                return "vector<double>";
+            case "list<string>":
+                return "vector<string>";
+            case "list<char>":
+                return "vector<char>";
+            case "list<bool>":
+                return "vector<bool>";
+            default:
+                return "unknown";
+        }
     }
 
     mapTypeToRust(type: string): string {
