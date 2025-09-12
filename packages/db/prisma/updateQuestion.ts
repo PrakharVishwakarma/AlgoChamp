@@ -1,3 +1,5 @@
+// /packages/db/prisma/updateQuestion.ts 
+
 import { LANGUAGE_MAPPING } from '@repo/common/language'
 
 import fs from 'fs';
@@ -16,45 +18,65 @@ function promisifiedReadFile(path: string): Promise<string> {
 }
 
 async function mainFunc(problemSlug: string, problemTitle: string) {
-    const problemStatement = await promisifiedReadFile(`${MOUNT_PATH}/${problemSlug}/Problem.md`);
+    try {
+        await db.$transaction(async (tx) => {
+            console.log(`\nSyncing problem: ${problemTitle} (${problemSlug})`);
 
-    const problem = await db.problem.upsert({
-        where: {
-            slug: problemSlug
-        },
-        create: {
-            title: problemTitle,
-            slug: problemSlug,
-            description: problemStatement
-        },
-        update: {
-            description: problemStatement
+            const problemStatement = await promisifiedReadFile(`${MOUNT_PATH}/${problemSlug}/Problem.md`);
 
-        }
-    });
-
-    await Promise.all(
-        Object.keys(LANGUAGE_MAPPING).map(async (language) => {
-            const code = await promisifiedReadFile(`${MOUNT_PATH}/${problemSlug}/boilerplate/function.${language}`);
-
-            await db.defaultCode.upsert({
+            const problem = await tx.problem.upsert({
                 where: {
-                    problemId_languageId: {
-                        problemId: problem.id,
-                        languageId: LANGUAGE_MAPPING[language].internal,
-                    }
+                    slug: problemSlug
                 },
                 create: {
-                    problemId: problem.id,
-                    languageId: LANGUAGE_MAPPING[language].internal,
-                    code: code,
+                    title: problemTitle,
+                    slug: problemSlug,
+                    description: problemStatement
                 },
                 update: {
-                    code: code
+                    description: problemStatement
                 }
             });
-        })
-    );
+
+            await Promise.all(
+                Object.keys(LANGUAGE_MAPPING).map(async (language) => {
+                    const code = await promisifiedReadFile(`${MOUNT_PATH}/${problemSlug}/boilerplate/function.${language}`);
+
+                    await tx.defaultCode.upsert({
+                        where: {
+                            problemId_languageId: {
+                                problemId: problem.id,
+                                languageId: LANGUAGE_MAPPING[language]!.internal,
+                            }
+                        },
+                        create: {
+                            problemId: problem.id,
+                            languageId: LANGUAGE_MAPPING[language]!.internal,
+                            code: code,
+                        },
+                        update: {
+                            code: code
+                        }
+                    });
+                })
+            );
+            console.log(`✅ Upserted boilerplate code for all languages successfully.`);
+
+        });
+    } catch (error) {
+        console.error(`\n❌ Failed to sync problem '${problemTitle}'.`);
+        if (error instanceof Error) {
+            console.error("   Error:", error.message);
+        } else {
+            console.error("   An unknown error occurred.");
+        }
+        process.exit(1);
+    }
 }
 
-mainFunc(process.env.PROBLEM_SLUG ?? "", process.env.PROBLEM_TITLE ?? "");
+if (!process.env.PROBLEM_SLUG || !process.env.PROBLEM_TITLE) {
+    console.error("❌ Error: Please provide PROBLEM_SLUG and PROBLEM_TITLE environment variables.");
+    process.exit(1);
+}
+
+mainFunc(process.env.PROBLEM_SLUG, process.env.PROBLEM_TITLE);

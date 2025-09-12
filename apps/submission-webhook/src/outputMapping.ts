@@ -1,3 +1,5 @@
+// /apps/submission-webhook/src/outputMapping.ts
+
 import { TestCaseStatus } from '@prisma/client';
 
 export const outputMapping: Record<string, TestCaseStatus> = {

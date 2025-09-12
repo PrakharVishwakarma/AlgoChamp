@@ -1,3 +1,5 @@
+// /packages/db/index.ts
+
 import { PrismaClient, TestCaseResult } from "@prisma/client";
 
 // ✅ Singleton pattern to avoid multiple Prisma instances in development

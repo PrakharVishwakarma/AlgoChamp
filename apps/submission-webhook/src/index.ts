@@ -1,4 +1,5 @@
-// Ensure correct imports for Express
+// /apps/submission-webhook/src/index.ts
+
 import express from "express";
 import type { Request, Response } from "express";
 import { db } from "@repo/db";
@@ -102,7 +103,7 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
                         },
                     },
                     create: {
-                        submisionId: response.id,
+                        submissionId: response.id,
                         userId: response.userId,
                         problemId: response.problemId,
                         contestId: response.activeContestId,

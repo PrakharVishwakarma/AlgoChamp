@@ -1,3 +1,5 @@
+// /packages/db/prisma/schema.prisma
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -25,7 +27,7 @@ model User {
   contestsSubmissions ContestSubmission[]
   role                UserRole            @default(USER)
   submissions         Submission[]
-  contestsPoints       ContestPoints[]
+  contestsPoints      ContestPoints[]
 }
 
 model Contest {
@@ -55,6 +57,7 @@ model ContestProblem {
   solved    Int      @default(0)
 
   @@unique([contestId, problemId])
+  @@index([problemId])
 }
 
 model Problem {
@@ -87,23 +90,27 @@ model DefaultCode {
 }
 
 model Submission {
-  id              String           @id @default(cuid())
-  problemId       String
-  userId          String
-  languageId      String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  code            String
-  fullCode        String
-  activeContestId String?
-  status          SubmissionStatus @default(PENDING)
-  testCases       TestCase[]
-  memory          Int?
-  time            Float?
-  activeContest   Contest?         @relation(fields: [activeContestId], references: [id])
-  user            User?            @relation(fields: [userId], references: [id])
-  language        Language        @relation(fields: [languageId], references: [id])
-  problem         Problem          @relation(fields: [problemId], references: [id])
+  id                String             @id @default(cuid())
+  problemId         String
+  userId            String
+  languageId        String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  code              String
+  fullCode          String
+  activeContestId   String?
+  status            SubmissionStatus   @default(PENDING)
+  testCases         TestCase[]
+  memory            Int?
+  time              Float?
+  activeContest     Contest?           @relation(fields: [activeContestId], references: [id])
+  user              User?              @relation(fields: [userId], references: [id])
+  language          Language           @relation(fields: [languageId], references: [id])
+  problem           Problem            @relation(fields: [problemId], references: [id])
+  ContestSubmission ContestSubmission?
+
+  @@index([userId, problemId])
+  @@index([activeContestId])
 }
 
 model Language {
@@ -127,31 +134,35 @@ model TestCase {
   memory           Int?
   time             Float?
   judge0TrackingId String         @unique
+  @@index([submissionId])
 }
 
 model ContestSubmission {
-  id          String  @id @default(cuid())
-  userId      String
-  problemId   String
-  contestId   String
-  submisionId String
-  points      Int
-  user        User    @relation(fields: [userId], references: [id])
-  problem     Problem @relation(fields: [problemId], references: [id])
-  contest     Contest @relation(fields: [contestId], references: [id])
+  id           String     @id @default(cuid())
+  userId       String
+  problemId    String
+  contestId    String
+  submissionId String     @unique
+  submision    Submission @relation(fields: [submissionId], references: [id])
+  points       Int
+  user         User       @relation(fields: [userId], references: [id])
+  problem      Problem    @relation(fields: [problemId], references: [id])
+  contest      Contest    @relation(fields: [contestId], references: [id])
 
   @@unique([userId, problemId, contestId])
+  @@index([contestId])
 }
 
 model ContestPoints {
-  id          String  @id @default(cuid())
-  contestId   String
-  userId      String
-  points      Int
-  rank        Int
-  user        User    @relation(fields: [userId], references: [id])
+  id        String @id @default(cuid())
+  contestId String
+  userId    String
+  points    Int
+  rank      Int
+  user      User   @relation(fields: [userId], references: [id])
 
   @@unique([contestId, userId])
+  @@index([contestId, points])
 }
 
 enum TestCaseResult {
@@ -192,5 +203,4 @@ enum TestCaseStatus {
   AC
   FAIL
   TLE
-} 
-
+}
