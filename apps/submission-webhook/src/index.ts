@@ -14,8 +14,20 @@ const app = express();
 // Configure middleware
 app.use(express.json());
 
+
 // Define route handlers
 app.put("/submission-callback", async (req: Request, res: Response): Promise<any> => {
+    // Validate header secret
+    const expectedHeaderSecret = process.env.JUDGE0_SECRET;
+    if (expectedHeaderSecret) {
+        const sentHeaderSecret = req.headers["x-judge0-secret"] as string | undefined;
+        if (sentHeaderSecret !== expectedHeaderSecret) {
+            return res.status(401).json({
+                message: "Invalid header secret, Unauthorized access",
+            });
+        }
+    }
+
     const parseBody = submissionCallback.safeParse(req.body);
 
     if (!parseBody.success) {
@@ -33,46 +45,66 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
         // Get the correct status from the mapping
         const status = outputMapping[parseBody.data.status.description] || TestCaseStatus.FAIL;
 
-        const testCase = await db.testCase.update({
+        const judge0TrackingId = parseBody.data.token;
+
+        const initialTestCase = await db.testCase.findUnique({
             where: {
-                judge0TrackingId: parseBody.data.token
+                judge0TrackingId
             },
-            data: {
-                status: status,
-                time: time,
-                memory: memory
+            select: {
+                submissionId: true
             }
         });
 
-        if (!testCase) {
+        if (!initialTestCase) {
             return res.status(404).json({
                 message: "Test case not found"
             });
         }
 
-        // Rest of your code...
-        const allTestscaseData = await db.testCase.findMany({
-            where: {
-                submissionId: testCase.submissionId
+        const submissionId = initialTestCase.submissionId;
+
+        await db.$transaction(async (tx) => {
+            // Lock parent submission row
+            await tx.$executeRaw`SELECT id FROM "Submission" WHERE "id" = ${submissionId} FOR UPDATE`;
+
+            await tx.testCase.update({
+                where: {
+                    judge0TrackingId
+                },
+                data: {
+                    status: status,
+                    time: time,
+                    memory: memory
+                }
+            });
+
+
+            // Rest of your code...
+            const allTestsCases = await tx.testCase.findMany({
+                where: {
+                    submissionId
+                }
+            });
+
+            const pendingTestsCases = allTestsCases.filter(tc => tc.status === TestCaseStatus.PENDING);
+            if (pendingTestsCases.length > 0) {
+                return;
             }
-        });
 
-        const pendingTestscases = allTestscaseData.filter(tc => tc.status === TestCaseStatus.PENDING);
-        const failedTestscases = allTestscaseData.filter(tc => tc.status !== TestCaseStatus.AC);
-
-        if (pendingTestscases.length === 0) {
-            const accepted = failedTestscases.length === 0;
+            const failedTestsCases = allTestsCases.filter(tc => tc.status !== TestCaseStatus.AC);
+            const accepted = failedTestsCases.length === 0;
 
             // Calculate max time with null safety
-            const testCaseTimes = allTestscaseData
+            const testCaseTimes = allTestsCases
                 .map(testcase => testcase.time || 0)
                 .filter(time => typeof time === 'number');
 
             const maxTime = testCaseTimes.length > 0 ? Math.max(...testCaseTimes) : 0;
 
-            const response = await db.submission.update({
+            const submission = await tx.submission.update({
                 where: {
-                    id: testCase.submissionId
+                    id: submissionId
                 },
                 data: {
                     status: accepted ? 'AC' : 'REJECTED',
@@ -84,29 +116,29 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
                 }
             });
 
-            if (response.activeContestId && response.activeContest) {
+            if (submission.activeContestId && submission.activeContest) {
                 const points = await getPoints(
-                    response.activeContestId,
-                    response.userId,
-                    response.problemId,
-                    response.problem.difficulty,
-                    response.activeContest?.startTime,
-                    response.activeContest?.endTime
+                    submission.activeContestId,
+                    submission.userId,
+                    submission.problemId,
+                    submission.problem.difficulty,
+                    submission.activeContest?.startTime,
+                    submission.activeContest?.endTime
                 );
 
-                await db.contestSubmission.upsert({
+                await tx.contestSubmission.upsert({
                     where: {
                         userId_problemId_contestId: {
-                            contestId: response.activeContestId,
-                            userId: response.userId,
-                            problemId: response.problemId
+                            contestId: submission.activeContestId,
+                            userId: submission.userId,
+                            problemId: submission.problemId
                         },
                     },
                     create: {
-                        submissionId: response.id,
-                        userId: response.userId,
-                        problemId: response.problemId,
-                        contestId: response.activeContestId,
+                        submissionId: submission.id,
+                        userId: submission.userId,
+                        problemId: submission.problemId,
+                        contestId: submission.activeContestId,
                         points: points
                     },
                     update: {
@@ -114,11 +146,10 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
                     }
                 });
             }
-        }
-
-    return res.status(200).json({
-        message : "Success",
-    })
+        });
+        return res.status(200).json({
+            message: "Success",
+        })
     } catch (error) {
         console.error("Error processing submission callback:", error);
         return res.status(500).json({
@@ -129,7 +160,7 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
 });
 
 // Start the server if this is the main module
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`Webhook server listening on port ${PORT}`);
+    console.log(`Submission-Webhook server listening on port ${PORT}`);
 });

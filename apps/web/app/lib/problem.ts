@@ -9,7 +9,7 @@ interface Problem {
     outputs: string[];
 }
 
-const MOUNT_PATH = process.env.MOUNT_PATH ?? "/home/ubuntu/codechef-clone/app/problems";
+const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../../../problems";
 
 export const getProblems = async (
     problemId: string,
