@@ -1,3 +1,5 @@
+// /apps/web/app/lib/problem.ts
+
 import fs from "fs";
 
 type SUPPORTED_LANGS = "cpp" | "js" | "rs";
@@ -9,7 +11,7 @@ interface Problem {
     outputs: string[];
 }
 
-const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../../../problems";
+const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../../problems";
 
 export const getProblems = async (
     problemId: string,

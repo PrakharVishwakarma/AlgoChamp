@@ -1,13 +1,15 @@
+// apps/web/app/api/submission/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { submissioninputValidation } from "@repo/zod-validation/submissioninputValidation";
 
-import { db } from "@repo/db/client";
+import { db } from "@repo/db";
 
-import { getProblems } from "../../../lib/problem";
+import { getProblems } from "../../lib/problem";
 
 // this is remined to code for now
-import { JUDGE0_URL } from "../../../lib/config";
+// import { JUDGE0_URL } from "../../../lib/config";
 
 import axios from "axios";
 
@@ -15,7 +17,7 @@ import { LANGUAGE_MAPPING } from "@repo/common/language";
 
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../../../lib/auth";
+import { authOptions } from "../../lib/auth";
 
 import { parse } from "url"
 
@@ -61,11 +63,20 @@ export async function POST(req: NextRequest) {
         submissionInput.data.code
     );
 
+    // Validate language mapping exists
+    const languageMapping = LANGUAGE_MAPPING[submissionInput.data.languageId];
+    if (!languageMapping) {
+        return NextResponse.json(
+            { message: `Unsupported language: ${submissionInput.data.languageId}` },
+            { status: 400 }
+        );
+    }
+
     const response = await axios.post(
-        `${JUDGE0_URL}/api/submission/batch?base64_encoded=false`, {
+        `${process.env.JUDGE0_URL}/api/submission/batch?base64_encoded=false`, {
         submission: problem.inputs.map((input, index) => ({
-            language_id: LANGUAGE_MAPPING[submissionInput.data.languageId]?.judge0,
-            sourde_code: problem.fullBoilerPlateCode,
+            language_id: languageMapping.judge0,
+            source_code: problem.fullBoilerPlateCode,
             stdin: input,
             expected_outcome: problem.outputs[index],
             callback_url: process.env.JUDGE0_CALLBACK_URL ?? "http://localhost:3000/api/submission/callback",
@@ -76,7 +87,7 @@ export async function POST(req: NextRequest) {
         data: {
             userId: session.user.id,
             problemId: submissionInput.data.problemId,
-            languageId: LANGUAGE_MAPPING[submissionInput.data.languageId]?.internal!,
+            languageId: languageMapping.internal,
             code: submissionInput.data.code,
             fullCode: problem.fullBoilerPlateCode,
             status: "PENDING",

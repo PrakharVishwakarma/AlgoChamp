@@ -2,7 +2,7 @@
 
 import { LANGUAGE_MAPPING } from "@repo/common/language";
 
-import { db } from "../index";
+import { db } from "../src/index";
 
 async function mainFunc() {
     console.log("Seeding Language in database...");

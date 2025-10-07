@@ -1,12 +1,16 @@
 // /apps/submission-webhook/src/index.ts
 
+// Load environment variables from .env.local
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+
 import express from "express";
 import type { Request, Response } from "express";
 import { db } from "@repo/db";
-import { submissionCallback } from "@repo/zod-validation/src/SubmissionCallback";
+import { submissionCallback } from "@repo/zod-validation/submissionCallback";
 import { TestCaseStatus } from "@prisma/client";
-import { outputMapping } from "./outputMapping";
-import { getPoints } from "./points";
+import { outputMapping } from "./outputMapping.js";
+import { getPoints } from "./points.js";
 
 // Create Express application instance
 const app = express();

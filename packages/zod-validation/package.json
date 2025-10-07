@@ -1,6 +1,7 @@
 {
   "name": "@repo/zod-validation",
   "version": "1.0.0",
+  "type": "module",
   "exports": {
     "./userValidation": "./src/UserValidation.ts",
     "./submissioninputValidation" : "./src/SubmissioninputValidation.ts",

@@ -4,7 +4,7 @@ import { LANGUAGE_MAPPING } from '@repo/common/language'
 
 import fs from 'fs';
 
-import { db } from '../index';
+import { db } from '../src/index';
 
 const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../apps/problems";
 
