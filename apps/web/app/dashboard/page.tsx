@@ -1,4 +1,4 @@
-import UserInfo from "../../components/UserInfo";
+import WelcomeDashboard from "../../components/WelcomeDashboard";
 import { authOptions } from "../lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <UserInfo />
+      <WelcomeDashboard />
     </>
   );
 }

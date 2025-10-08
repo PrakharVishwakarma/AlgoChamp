@@ -1,3 +1,5 @@
+// apps/web/app/api/register/route.tsx
+
 import { NextResponse } from "next/server";
 import { db } from "@repo/db";
 import bcrypt from "bcrypt";

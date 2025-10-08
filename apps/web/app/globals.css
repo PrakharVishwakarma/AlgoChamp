@@ -2,14 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* Theme System CSS Variables */
 :root {
-  --foreground: #ffffff;
-  --background: #171717;
+  /* Light theme (default) */
+  --background: 0 0% 100%;                    /* white */
+  --foreground: 224 71.4% 4.1%;               /* slate-950 */
+  --card: 0 0% 100%;                          /* white */
+  --card-foreground: 224 71.4% 4.1%;         /* slate-950 */
+  --popover: 0 0% 100%;                       /* white */
+  --popover-foreground: 224 71.4% 4.1%;      /* slate-950 */
+  --primary: 220.9 39.3% 11%;                /* slate-900 */
+  --primary-foreground: 210 20% 98%;         /* slate-50 */
+  --secondary: 220 14.3% 95.9%;              /* slate-100 */
+  --secondary-foreground: 220.9 39.3% 11%;   /* slate-900 */
+  --muted: 220 14.3% 95.9%;                  /* slate-100 */
+  --muted-foreground: 220 8.9% 46.1%;        /* slate-500 */
+  --vibrant-foreground: 273, 71%, 69% /* */
+  --accent: 220 14.3% 95.9%;                 /* slate-100 */
+  --accent-foreground: 220.9 39.3% 11%;      /* slate-900 */
+  --destructive: 0 84.2% 60.2%;              /* red-500 */
+  --destructive-foreground: 210 20% 98%;     /* slate-50 */
+  --success: 142.1 76.2% 36.3%;              /* green-600 */
+  --success-foreground: 210 20% 98%;         /* slate-50 */
+  --warning: 47.9 95.8% 53.1%;               /* yellow-500 */
+  --warning-foreground: 220.9 39.3% 11%;     /* slate-900 */
+  --info: 221.2 83.2% 53.3%;                 /* blue-500 */
+  --info-foreground: 210 20% 98%;            /* slate-50 */
+  --border: 220 13% 91%;                     /* slate-200 */
+  --input: 220 13% 91%;                      /* slate-200 */
+  --ring: 221.2 83.2% 53.3%;                 /* blue-500 */
+  --radius: 0.5rem;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --background: 224 71.4% 4.1%;              /* slate-950 */
+  --foreground: 210 20% 98%;                 /* slate-50 */
+  --card: 224 71.4% 4.1%;                    /* slate-950 */
+  --card-foreground: 210 20% 98%;            /* slate-50 */
+  --popover: 224 71.4% 4.1%;                 /* slate-950 */
+  --popover-foreground: 210 20% 98%;         /* slate-50 */
+  --primary: 210 20% 98%;                    /* slate-50 */
+  --primary-foreground: 220.9 39.3% 11%;     /* slate-900 */
+  --secondary: 215 27.9% 16.9%;              /* slate-800 */
+  --secondary-foreground: 210 20% 98%;       /* slate-50 */
+  --muted: 215 27.9% 16.9%;                  /* slate-800 */
+  --muted-foreground: 217.9 10.6% 64.9%;     /* slate-400 */
+  --vibrant-foreground: 273, 71%, 69% /* */
+  --accent: 215 27.9% 16.9%;                 /* slate-800 */
+  --accent-foreground: 210 20% 98%;          /* slate-50 */
+  --destructive: 0 62.8% 30.6%;              /* red-900 */
+  --destructive-foreground: 210 20% 98%;     /* slate-50 */
+  --success: 142.1 70.6% 45.3%;              /* green-600 */
+  --success-foreground: 210 20% 98%;         /* slate-50 */
+  --warning: 47.9 95.8% 53.1%;               /* yellow-500 */
+  --warning-foreground: 220.9 39.3% 11%;     /* slate-900 */
+  --info: 217.2 91.2% 59.8%;                 /* blue-400 */
+  --info-foreground: 210 20% 98%;            /* slate-50 */
+  --border: 215 27.9% 16.9%;                 /* slate-800 */
+  --input: 215 27.9% 16.9%;                  /* slate-800 */
+  --ring: 216 12.2% 83.9%;                   /* slate-300 */
+}
+
+/* AlgoChamp specific theme colors */
+:root {
+  /* Coding platform specific colors */
+  --code-bg: 220 13% 18%;                    /* Dark code background */
+  --code-foreground: 210 20% 98%;            /* Light code text */
+  --syntax-keyword: 221.2 83.2% 53.3%;       /* Blue for keywords */
+  --syntax-string: 142.1 76.2% 36.3%;        /* Green for strings */
+  --syntax-comment: 220 8.9% 46.1%;          /* Gray for comments */
+  --gradient-primary: linear-gradient(135deg, hsl(221.2 83.2% 53.3%) 0%, hsl(262.1 83.3% 57.8%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(142.1 76.2% 36.3%) 0%, hsl(173.4 58.9% 39.2%) 100%);
+}
+
+[data-theme="dark"] {
+  --code-bg: 215 27.9% 16.9%;                /* slate-800 */
+  --code-foreground: 210 20% 98%;            /* slate-50 */
+  --syntax-keyword: 217.2 91.2% 59.8%;       /* blue-400 */
+  --syntax-string: 142.1 70.6% 45.3%;        /* green-500 */
+  --syntax-comment: 217.9 10.6% 64.9%;       /* slate-400 */
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Flash Message Animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+.animate-slide-out {
+  animation: slide-out 0.3s ease-in forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
 }

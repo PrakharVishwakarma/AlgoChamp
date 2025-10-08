@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "../provider";
 import { JSX } from "react";
+import { FlashMessageContainer } from "../components/common/FlashMessageContainer";
+import { ThemeScript } from "../components/theme/ThemeScript";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,14 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <html lang="en" className="scroll-smooth">
-      <Providers>
-        <body className={`${inter.className} antialiased bg-slate-950 text-white min-h-screen`}>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className={`${inter.className} antialiased bg-background text-foreground min-h-screen transition-colors duration-300`}>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             {children}
           </div>
-        </body>
-      </Providers>
+          <FlashMessageContainer />
+        </Providers>
+      </body>
     </html>
   );
 }

@@ -1,25 +1,30 @@
-import { Button } from "./button";
-import Link from "next/link";
-import { Code2, Users, Trophy, BarChart3, User } from "lucide-react";
+// apps/web/components/Navigation.tsx
 
-interface AppbarProps {
+"use client";
+
+import Link from "next/link";
+import { Trophy, Users, BarChart3, User } from "lucide-react";
+import { Button } from "@repo/ui/button";
+import { ThemeToggle } from "./theme/ThemeToggle";
+import { Logo } from "./Logo";
+
+interface NavigationProps {
     user?: {
         name?: string | null;
         id?: string;
     };
     onSignin: () => void;
     onSignout: () => void;
-    themeToggle?: React.ReactNode;
 }
 
-export const Appbar = ({ user, onSignin, onSignout, themeToggle }: AppbarProps) => {
+export const Navigation = ({ user, onSignin, onSignout }: NavigationProps) => {
     return (
         <header className="sticky top-0 z-50">
             <div className="flex justify-between items-center px-8 py-4 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-wide text-foreground hover:text-primary transition-colors">
-                    <Code2 className="text-primary" />
-                    <span className="font-mono">AlgoChamp</span>
+                <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity min-w-10">
+                    <Logo size="sm" priority />
+                    <p className="font-bold text-2xl">AlgoChamp</p>
                 </Link>
 
                 {/* Navigation */}
@@ -29,11 +34,11 @@ export const Appbar = ({ user, onSignin, onSignout, themeToggle }: AppbarProps) 
                         Problems
                     </Link>
                     <Link href="/contests" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                        <BarChart3 className="w-4 h-4" />
+                        <Users className="w-4 h-4" />
                         Contests
                     </Link>
                     <Link href="/leaderboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                        <Users className="w-4 h-4" />
+                        <BarChart3 className="w-4 h-4" />
                         Leaderboard
                     </Link>
                 </nav>
@@ -41,8 +46,8 @@ export const Appbar = ({ user, onSignin, onSignout, themeToggle }: AppbarProps) 
                 {/* User Actions */}
                 <div className="flex items-center gap-4">
                     {/* Theme Toggle */}
-                    {themeToggle}
-
+                    <ThemeToggle variant="button" />
+                    
                     {user ? (
                         <>
                             {/* User Info */}
@@ -88,5 +93,3 @@ export const Appbar = ({ user, onSignin, onSignout, themeToggle }: AppbarProps) 
         </header>
     );
 };
-
-
