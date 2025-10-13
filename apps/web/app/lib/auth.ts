@@ -82,6 +82,10 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }: { token: JWT; user?: User | AuthUser }): Promise<JWT> {
             if (user) {
                 token.sub = user.id;
+                token.email = user.email;
+                token.name = user.name;
+                // Add role to token for middleware access
+                token.role = 'user'; // Default role, you can enhance this based on user data
             }
             return token;
         },
@@ -93,5 +97,19 @@ export const authOptions: NextAuthOptions = {
             }
             return session;
         }
+    },
+    // ✅ Add pages configuration for custom auth flows
+    // pages: {
+    //     signIn: '/api/auth/signin',
+    //     error: '/api/auth/error',
+    // },
+    // ✅ Configure session strategy for middleware compatibility
+    session: {
+        strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+    },
+    // ✅ JWT configuration
+    jwt: {
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     }
 }

@@ -137,7 +137,7 @@ export default function RegisterForm() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-secondary/5 to-background">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/5 to-background">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
@@ -147,7 +147,7 @@ export default function RegisterForm() {
 
             <div className="relative w-full max-w-[33rem]">
                 {/* Header */}
-                <div className="text-center mb-8 flex flex-row items-center gap-4 justify-center ">
+                <div className="text-center mb-6 flex flex-row items-center gap-4 justify-center ">
                     <div className="min-w-20">
                         <Logo size="md" className="mx-auto" />
                     </div>
