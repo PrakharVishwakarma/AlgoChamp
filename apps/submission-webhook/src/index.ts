@@ -120,6 +120,20 @@ app.put("/submission-callback", async (req: Request, res: Response): Promise<any
                 }
             });
 
+            await tx.problem.update({
+                where: { id: submission.problemId },
+                data: {
+                    totalSubmissions: {
+                        increment: 1
+                    },
+                    ...(accepted && {
+                        acceptedSubmissions: {
+                            increment: 1
+                        }
+                    })
+                }
+            });
+
             if (submission.activeContestId && submission.activeContest) {
                 const points = await getPoints(
                     submission.activeContestId,

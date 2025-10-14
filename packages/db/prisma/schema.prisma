@@ -70,10 +70,28 @@ model Problem {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   difficulty         Difficulty          @default(EASY)
+  totalSubmissions   Int                 @default(0)
+  acceptedSubmissions Int                @default(0)
   contestSubmissions ContestSubmission[]
   contests           ContestProblem[]
   submissions        Submission[]
   defaultCode        DefaultCode[]
+  tags               ProblemTag[]               
+}
+
+model Tag{
+  id        String    @id @default(cuid())
+  name      String    @unique
+  problems  ProblemTag[]
+}
+
+model ProblemTag{
+  problemId String
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id])
+
+  @@id([problemId, tagId])
 }
 
 model DefaultCode {
