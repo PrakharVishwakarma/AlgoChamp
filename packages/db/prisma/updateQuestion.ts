@@ -1,12 +1,19 @@
 // /packages/db/prisma/updateQuestion.ts 
 
-import { LANGUAGE_MAPPING } from '@repo/common/language'
+// import { LANGUAGE_MAPPING } from '../../common/src/language';
 
 import fs from 'fs';
 
 import { db } from '../src/index';
 
 const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../apps/problems";
+
+const LANGUAGE_MAPPING: Record<string, { name: string; judge0: number; internal: string }> = {
+    // 🔹 Add string-based mappings for clarity
+    "cpp": { name: "C++", judge0: 54, internal: "1" },
+    "js": { name: "JavaScript", judge0: 63, internal: "5" },
+    "rs": { name: "Rust", judge0: 73, internal: "8" }
+};
 
 function promisifiedReadFile(path: string): Promise<string> {
     return new Promise((resolve, reject) => {

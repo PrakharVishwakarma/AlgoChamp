@@ -75,6 +75,12 @@ model Problem {
   submissions        Submission[]
   defaultCode        DefaultCode[]
   contestSubmissions ContestSubmission[]
+
+  @@index([difficulty]) // For filtering by difficulty
+  @@index([solved]) // For sorting by solve count
+  @@index([totalSubmissions]) // For sorting by submission count
+  @@index([hidden, difficulty]) // For filtered queries
+  @@index([createdAt]) // For sorting by creation time
 }
 
 model DefaultCode {
@@ -112,6 +118,9 @@ model Submission {
 
   @@index([userId, problemId])
   @@index([activeContestId])
+  @@index([userId, problemId, status]) // For status filtering
+  @@index([userId, problemId, createdAt(sort: Desc)]) // CRITICAL: For submissions list query optimization
+  @@index([createdAt]) // For sorting by creation time
 }
 
 model Language {
@@ -135,7 +144,11 @@ model TestCase {
   memory           Int?
   time             Float?
   judge0TrackingId String         @unique
+
   @@index([submissionId])
+  @@index([submissionId, status]) // For performance optimization
+  @@index([judge0TrackingId]) // For webhook lookups
+  @@index([status]) // For status filtering
 }
 
 model ContestSubmission {
@@ -144,7 +157,7 @@ model ContestSubmission {
   problemId    String
   contestId    String
   submissionId String     @unique
-  submision    Submission @relation(fields: [submissionId], references: [id])
+  submission   Submission @relation(fields: [submissionId], references: [id])
   points       Int
   user         User       @relation(fields: [userId], references: [id])
   problem      Problem    @relation(fields: [problemId], references: [id])

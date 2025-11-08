@@ -14,15 +14,15 @@ interface Problem {
 const MOUNT_PATH = process.env.MOUNT_PATH ?? "../../../problems";
 
 export const getProblems = async (
-    problemId: string,
+    problemSlug: string,
     languageId: SUPPORTED_LANGS
 ): Promise<Problem> => {
-    const fullBoilerPlateCode = await getProblemFullBoilerPlateCode(problemId, languageId);
-    const inputs = await getProblemInputs(problemId);
-    const outputs = await getProblemOutputs(problemId);
+    const fullBoilerPlateCode = await getProblemFullBoilerPlateCode(problemSlug, languageId);
+    const inputs = await getProblemInputs(problemSlug);
+    const outputs = await getProblemOutputs(problemSlug);
 
     return {
-        id: problemId,
+        id: problemSlug,
         fullBoilerPlateCode,
         inputs,
         outputs,
@@ -31,11 +31,11 @@ export const getProblems = async (
 
 
 async function getProblemFullBoilerPlateCode(
-    problemId: string,
+    problemSlug: string,
     languageId: SUPPORTED_LANGS
 ): Promise<string> {
     return new Promise((resolve, reject) => {
-        fs.readFile(`${MOUNT_PATH}/${problemId}/${languageId}/boilerplate-full/function.${languageId}`, { encoding: "utf8" }, (err, data) => {
+        fs.readFile(`${MOUNT_PATH}/${problemSlug}/boilerplate-full/function.${languageId}`, { encoding: "utf8" }, (err, data) => {
             if (err) {
                 reject(err);
             }
@@ -45,9 +45,9 @@ async function getProblemFullBoilerPlateCode(
 }
 
 
-async function getProblemInputs(problemId: string): Promise<string[]> {
+async function getProblemInputs(problemSlug: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
-        fs.readdir(`${MOUNT_PATH}/${problemId}/tests/inputs`, async (err, files) => {
+        fs.readdir(`${MOUNT_PATH}/${problemSlug}/tests/inputs`, async (err, files) => {
             if (err) {
                 reject(err);
             } else {
@@ -55,7 +55,7 @@ async function getProblemInputs(problemId: string): Promise<string[]> {
                     const data = await Promise.all(
                         files.map((file) => {
                             return new Promise<string>((resolve, reject) => {
-                                fs.readFile(`${MOUNT_PATH}/${problemId}/tests/inputs/${file}`, { encoding: "utf8" }, (err, data) => {
+                                fs.readFile(`${MOUNT_PATH}/${problemSlug}/tests/inputs/${file}`, { encoding: "utf8" }, (err, data) => {
                                     if (err) {
                                         reject(err);
                                     } else {
@@ -74,9 +74,9 @@ async function getProblemInputs(problemId: string): Promise<string[]> {
     });
 }
 
-async function getProblemOutputs(problemId: string): Promise<string[]> {
+async function getProblemOutputs(problemSlug: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
-        fs.readdir(`${MOUNT_PATH}/${problemId}/tests/outputs`, async (err, files) => {
+        fs.readdir(`${MOUNT_PATH}/${problemSlug}/tests/outputs`, async (err, files) => {
             if (err) {
                 reject(err);
             } else {
@@ -84,7 +84,7 @@ async function getProblemOutputs(problemId: string): Promise<string[]> {
                     const data = await Promise.all(
                         files.map((file) => {
                             return new Promise<string>((resolve, reject) => {
-                                fs.readFile(`${MOUNT_PATH}/${problemId}/tests/outputs/${file}`, { encoding: "utf8" }, (err, data) => {
+                                fs.readFile(`${MOUNT_PATH}/${problemSlug}/tests/outputs/${file}`, { encoding: "utf8" }, (err, data) => {
                                     if (err) {
                                         reject(err);
                                     } else {

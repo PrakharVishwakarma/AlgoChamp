@@ -3,7 +3,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Users, BarChart3, User } from "lucide-react";
+import { Trophy, Users, BarChart3, User, LayoutDashboard } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { ThemeToggle } from "./theme/ThemeToggle";
 import { Logo } from "./Logo";
@@ -29,6 +29,11 @@ export const Navigation = ({ user, onSignin, onSignout }: NavigationProps) => {
 
                 {/* Navigation */}
                 <nav className="hidden md:flex items-center space-x-6">
+                    {user && (<Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                    </Link>)}
+
                     <Link href="/problems" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                         <Trophy className="w-4 h-4" />
                         Problems
@@ -47,7 +52,7 @@ export const Navigation = ({ user, onSignin, onSignout }: NavigationProps) => {
                 <div className="flex items-center gap-4">
                     {/* Theme Toggle */}
                     <ThemeToggle variant="button" />
-                    
+
                     {user ? (
                         <>
                             {/* User Info */}
@@ -59,14 +64,6 @@ export const Navigation = ({ user, onSignin, onSignout }: NavigationProps) => {
                                     {user.name || 'User'}
                                 </span>
                             </div>
-
-                            {/* Dashboard Button */}
-                            <Link
-                                href="/dashboard"
-                                className="px-4 py-2 text-sm font-semibold text-info-foreground bg-info rounded-lg shadow-md hover:opacity-90 hover:scale-105 transition duration-300"
-                            >
-                                Dashboard
-                            </Link>
 
                             {/* Logout Button */}
                             <Button variant="secondary" onClick={onSignout}>

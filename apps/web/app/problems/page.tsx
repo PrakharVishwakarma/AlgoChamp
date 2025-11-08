@@ -4,10 +4,15 @@ import { JSX } from "react";
 import { ClientNavigation } from "../../components/ClientNavigation";
 import { Logo } from "../../components/Logo";
 import { getProblems, type ProblemFilters, type SortOption } from "./actions";
-import { ProblemList } from "./components/ProblemList";
+import { ProblemList } from "./_components/ProblemList";
 import { Suspense } from "react";
-import { ProblemListSkeleton } from "./components/ProblemListSkeleton";
+import { ProblemListSkeleton } from "./_components/ProblemListSkeleton";
 import { Difficulty } from "@prisma/client";
+
+// ✅ OPTIMIZATION: Cache problems list page for 5 minutes
+// List changes more frequently than individual problems (new submissions, etc.)
+// but still benefits from caching
+export const revalidate = 300; // 5 minutes (300 seconds)
 
 interface ProblemsPageProps {
   searchParams: Promise<{

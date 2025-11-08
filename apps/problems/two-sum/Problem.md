@@ -2,7 +2,7 @@
 
 Find the sum of the given elements. Both the numbers will always be 0 or positive.
 
-#### Test case 1
+### Example 1
 
 Input
 
@@ -16,7 +16,7 @@ Output
 3
 ```
 
-#### Test case 2
+### Example 2
 
 Input 
 
@@ -28,4 +28,18 @@ Output
 
 ```
 101
+```
+
+### Example 3
+
+Input 
+
+```
+100, 100
+```
+
+Output
+
+```
+200
 ```

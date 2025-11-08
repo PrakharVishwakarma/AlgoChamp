@@ -8,7 +8,9 @@
     "JUDGE0_SECRET", 
     "JUDGE0_CALLBACK_URL",
     "MOUNT_PATH",
-    "PORT"
+    "PORT",
+    "REVALIDATE_SECRET",
+    "JUDGE0_RAPIDAPI_KEY"
   ],
   "globalEnv": [
     "DATABASE_URL",
@@ -17,7 +19,9 @@
     "JUDGE0_SECRET", 
     "JUDGE0_CALLBACK_URL",
     "MOUNT_PATH",
-    "PORT"
+    "PORT",
+    "REVALIDATE_SECRET",
+    "JUDGE0_RAPIDAPI_KEY"
   ],
   "tasks": {
     "build": {
@@ -31,7 +35,9 @@
         "JUDGE0_SECRET", 
         "JUDGE0_CALLBACK_URL",
         "MOUNT_PATH",
-        "PORT"
+        "PORT",
+        "REVALIDATE_SECRET",
+        "JUDGE0_RAPIDAPI_KEY"
       ]
     },
     "lint": {
@@ -43,7 +49,9 @@
         "JUDGE0_SECRET", 
         "JUDGE0_CALLBACK_URL",
         "MOUNT_PATH",
-        "PORT"
+        "PORT",
+        "REVALIDATE_SECRET",
+        "JUDGE0_RAPIDAPI_KEY"
       ]
     },
     "check-types": {
@@ -55,7 +63,9 @@
         "JUDGE0_SECRET", 
         "JUDGE0_CALLBACK_URL",
         "MOUNT_PATH",
-        "PORT"
+        "PORT",
+        "REVALIDATE_SECRET",
+        "JUDGE0_RAPIDAPI_KEY"
       ]
     },
     "dev": {
@@ -68,7 +78,9 @@
         "JUDGE0_SECRET", 
         "JUDGE0_CALLBACK_URL",
         "MOUNT_PATH",
-        "PORT"
+        "PORT",
+        "REVALIDATE_SECRET",
+        "JUDGE0_RAPIDAPI_KEY"
       ]
     }
   }

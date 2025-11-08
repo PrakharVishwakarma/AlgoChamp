@@ -152,45 +152,46 @@ function buildWhereClause(filters: ProblemFilters, userId?: string) {
 
 /**
  * Calculate acceptance rate from submission data
+ * ✅ Optimized to use a single aggregated query
  */
 async function calculateAcceptanceRates(problemIds: string[]): Promise<Record<string, number>> {
-  // Get total submissions count for each problem
+  if (problemIds.length === 0) return {};
+
+  // ✅ Single optimized query using aggregation
   const submissionStats = await db.submission.groupBy({
-    by: ['problemId'],
+    by: ['problemId', 'status'],
     where: {
       problemId: { in: problemIds }
     },
     _count: {
-      problemId: true
-    }
-  });
-
-  // Get accepted submissions count for each problem
-  const acceptedStats = await db.submission.groupBy({
-    by: ['problemId'],
-    where: {
-      problemId: { in: problemIds },
-      status: SubmissionStatus.AC
-    },
-    _count: {
-      problemId: true
+      id: true
     }
   });
 
   const acceptanceRates: Record<string, number> = {};
   
+  // Process aggregated results
+  const problemStats: Record<string, { total: number; accepted: number }> = {};
+  
   submissionStats.forEach(stat => {
-    const totalSubmissions = stat._count.problemId;
-    const acceptedSubmissions = acceptedStats.find(acc => acc.problemId === stat.problemId)?._count.problemId || 0;
+    if (!problemStats[stat.problemId]) {
+      problemStats[stat.problemId] = { total: 0, accepted: 0 };
+    }
     
-    acceptanceRates[stat.problemId] = totalSubmissions > 0 
-      ? parseFloat(((acceptedSubmissions / totalSubmissions) * 100).toFixed(1))
-      : 0;
+    const stats = problemStats[stat.problemId]!;
+    stats.total += stat._count.id;
+    
+    if (stat.status === SubmissionStatus.AC) {
+      stats.accepted += stat._count.id;
+    }
   });
 
-  // Set 0% for problems with no submissions
+  // Calculate rates
   problemIds.forEach(id => {
-    if (!(id in acceptanceRates)) {
+    const stats = problemStats[id];
+    if (stats && stats.total > 0) {
+      acceptanceRates[id] = parseFloat(((stats.accepted / stats.total) * 100).toFixed(1));
+    } else {
       acceptanceRates[id] = 0;
     }
   });
@@ -230,7 +231,7 @@ export async function getProblems(
       where: whereClause
     });
 
-    // 4. Fetch the paginated list of problems
+    // 4. Fetch the paginated list of problems with optimized selection
     const problems = await db.problem.findMany({
       where: whereClause,
       take: pageSize,
@@ -243,6 +244,14 @@ export async function getProblems(
         difficulty: true,
         solved: true,
         createdAt: true,
+        // ✅ Only include submission data if we need it for status filtering
+        ...(userId && filters.status && filters.status !== 'ALL' && {
+          submissions: {
+            where: { userId },
+            select: { status: true },
+            take: 1
+          }
+        })
       },
     });
 
@@ -255,14 +264,13 @@ export async function getProblems(
       };
     }
 
-    // 5. Calculate acceptance rates for fetched problems
+    // 5. ✅ Optimized: calculate acceptance rates and user statuses in parallel
     const problemIds = problems.map(p => p.id);
-    const acceptanceRates = await calculateAcceptanceRates(problemIds);
-
-    // 6. If user is logged in, fetch their submission statuses
-    const problemStatuses: Record<string, { solved: boolean; attempted: boolean }> = {};
-    if (userId) {
-      const userSubmissions = await db.submission.findMany({
+    
+    const [acceptanceRates, userSubmissions] = await Promise.all([
+      calculateAcceptanceRates(problemIds),
+      // Only fetch user submissions if user is logged in
+      userId ? db.submission.findMany({
         where: {
           userId: userId,
           problemId: { in: problemIds },
@@ -271,16 +279,27 @@ export async function getProblems(
           problemId: true,
           status: true,
         },
-      });
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }) : Promise.resolve([])
+    ]);
 
+    // 6. ✅ Optimized user status calculation
+    const problemStatuses: Record<string, { solved: boolean; attempted: boolean }> = {};
+    
+    if (userId && userSubmissions.length > 0) {
       for (const submission of userSubmissions) {
         if (!problemStatuses[submission.problemId]) {
           problemStatuses[submission.problemId] = { solved: false, attempted: false };
         }
+        
+        const status = problemStatuses[submission.problemId]!;
+        status.attempted = true;
+        
         if (submission.status === SubmissionStatus.AC) {
-          problemStatuses[submission.problemId]!.solved = true;
+          status.solved = true;
         }
-        problemStatuses[submission.problemId]!.attempted = true;
       }
     }
 
@@ -325,7 +344,14 @@ export async function getProblems(
     };
 
   } catch (error) {
-    console.error('Error fetching problems:', error);
+    // ✅ Enhanced error logging with context
+    console.error('❌ Error fetching problems:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      options,
+      timestamp: new Date().toISOString()
+    });
+    
     throw new Error('Failed to fetch problems. Please try again.');
   }
 }

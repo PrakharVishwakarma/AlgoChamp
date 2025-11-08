@@ -8,15 +8,15 @@ export class FullProblemDefinitionGenerator extends ProblemDefinitionParser {
     generateCpp(): string {
         const inputRead = this.inputFields.map((field) => {
             if (field.type.startsWith("list<")) {
-                return `int size_${field.name};\n\t\tstd::cin >> size_${field.name};\n\t\t${this.mapTypeToCpp(field.type)} ${field.name}(size_${field.name});\n\t\tfor(int i = 0; i < size_${field.name}; i++) {\n\t\t\tstd::cin >> ${field.name}[i];\n\t\t}\n`;
+                return `int size_${field.name};\n\t\tcin >> size_${field.name};\n\t\t${this.mapTypeToCpp(field.type)} ${field.name}(size_${field.name});\n\t\tfor(int i = 0; i < size_${field.name}; i++) {\n\t\t\tcin >> ${field.name}[i];\n\t\t}\n`;
             } else {
-                return `\t${this.mapTypeToCpp(field.type)} ${field.name};\n\tstd::cin >> ${field.name};\n`;
+                return `\t${this.mapTypeToCpp(field.type)} ${field.name};\n\tcin >> ${field.name};\n`;
             }
         }).join("\n\t");
 
         const outputType = this.mapTypeToCpp(this.outputFields[0].type);
         const functionCall = `${outputType} result = ${this.functionName}(${this.inputFields.map(field => field.name).join(", ")});`;
-        const outputWrite = `std::cout << result << std::endl;`;
+        const outputWrite = `cout << result << endl;`;
 
         return (
             `#include <iostream>
@@ -24,6 +24,9 @@ export class FullProblemDefinitionGenerator extends ProblemDefinitionParser {
 #include <string>
 #include <algorithm>
 #include <iterator>
+#include <climits>
+
+using namespace std;
 
 ##USER_CODE_HERE##
 
