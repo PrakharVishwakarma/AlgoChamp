@@ -57,8 +57,8 @@ export async function getAuthStatus(request: NextRequest): Promise<{
       id: token.sub,
       email: token.email || '',
       name: token.name || null,
-      role: token.role as string || 'user',
-      isAdmin: token.role === 'admin' || false,
+      role: token.role as string || 'USER',
+      isAdmin: token.role === 'ADMIN' || false,
     };
 
     return {
@@ -221,9 +221,21 @@ export function getUserIP(request: NextRequest): string {
 }
 
 /**
- * Rate limiting helper (basic implementation)
+ * Rate limiting helper with memory cleanup for production
  */
-const rateLimitMap = new Map<string, { count: number; lastRequest: number }>();
+const rateLimitMap = new Map<string, { count: number; lastRequest: number; windowStart: number }>();
+
+// Cleanup old entries every 5 minutes to prevent memory leaks
+setInterval(() => {
+  const now = Date.now();
+  const fiveMinutesAgo = now - 5 * 60 * 1000;
+  
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (value.lastRequest < fiveMinutesAgo) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
 
 export function checkRateLimit(
   identifier: string,
@@ -234,13 +246,13 @@ export function checkRateLimit(
   const userLimit = rateLimitMap.get(identifier);
   
   if (!userLimit) {
-    rateLimitMap.set(identifier, { count: 1, lastRequest: now });
+    rateLimitMap.set(identifier, { count: 1, lastRequest: now, windowStart: now });
     return true;
   }
   
   // Reset if window has passed
-  if (now - userLimit.lastRequest > windowMs) {
-    rateLimitMap.set(identifier, { count: 1, lastRequest: now });
+  if (now - userLimit.windowStart > windowMs) {
+    rateLimitMap.set(identifier, { count: 1, lastRequest: now, windowStart: now });
     return true;
   }
   

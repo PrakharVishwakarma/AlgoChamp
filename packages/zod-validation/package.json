@@ -5,7 +5,8 @@
   "exports": {
     "./userValidation": "./src/UserValidation.ts",
     "./submissioninputValidation" : "./src/SubmissioninputValidation.ts",
-    "./submissionCallback" : "./src/SubmissionCallback.ts" 
+    "./submissionCallback" : "./src/SubmissionCallback.ts",
+    "./ContestValidation" : "./src/ContestValidation.ts"
   },
   "dependencies": {
     "zod": "^3.24.2"

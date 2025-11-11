@@ -17,17 +17,34 @@ interface AuthUser {
     id: string;
     name: string | null;
     email: string;
+    role: string;
 }
 
-// ✅ CRITICAL: Extend NextAuth types to include user id
+// ✅ CRITICAL: Extend NextAuth types to include user id and role
 declare module "next-auth" {
+    interface User {
+        id: string;
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+        role?: string | null;
+    }
+    
     interface Session {
         user: {
             id: string;
             name?: string | null;
             email?: string | null;
             image?: string | null;
+            role?: string | null;
         }
+    }
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        id?: string;
+        role?: string;
     }
 }
 
@@ -61,7 +78,8 @@ export const authOptions: NextAuthOptions = {
                             return {
                                 id: existingUser.id,
                                 name: existingUser.firstName,
-                                email: existingUser.email
+                                email: existingUser.email,
+                                role: existingUser.role
                             }
                         } else {
                             return null;
@@ -82,18 +100,21 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }: { token: JWT; user?: User | AuthUser }): Promise<JWT> {
             if (user) {
                 token.sub = user.id;
+                token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
-                // Add role to token for middleware access
-                token.role = 'user'; // Default role, you can enhance this based on user data
+                token.role = user.role || 'USER'; // Default to USER role from Prisma enum
             }
             return token;
         },
         // ✅ FIX 3: Properly typed session callback with null safety
         async session({ token, session }: { token: JWT; session: Session }): Promise<Session> {
             // Safe access with proper null checking
-            if (token.sub && session.user) {
-                session.user.id = token.sub;
+            if (token && session.user) {
+                session.user.id = token.sub || token.id || '';
+                session.user.role = token.role || 'USER';
+                session.user.email = token.email || session.user.email;
+                session.user.name = token.name || session.user.name;
             }
             return session;
         }

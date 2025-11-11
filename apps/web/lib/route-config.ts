@@ -46,7 +46,9 @@ export const ADMIN_ROUTES = [
     '/admin',                     // Admin dashboard
     '/admin/users',               // User management
     '/admin/problems',            // Problem management
+    '/admin/problems/[id]',        // Individual problem management
     '/admin/contests',            // Contest management
+    '/admin/contests/[id]',         // Individual contest management
     '/admin/analytics',           // Platform analytics
 ] as const;
 

@@ -7,7 +7,12 @@
     "./card": "./src/card.tsx",
     "./feature-card": "./src/feature-card.tsx",
     "./code": "./src/code.tsx",
-    "./appbar": "./src/Appbar.tsx"
+    "./appbar": "./src/Appbar.tsx",
+    "./label": "./src/Label.tsx",
+    "./input": "./src/Input.tsx",
+    "./textarea": "./src/Textarea.tsx",
+    "./modal": "./src/Modal.tsx",
+    "./switch": "./src/switch.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

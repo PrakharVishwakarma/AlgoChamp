@@ -30,36 +30,6 @@ model User {
   contestsPoints      ContestPoints[]
 }
 
-model Contest {
-  id                 String              @id @default(cuid())
-  title              String
-  description        String?
-  startTime          DateTime
-  endTime            DateTime
-  hidden             Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  submissions        Submission[]
-  problem            ContestProblem[]
-  contestsubmissions ContestSubmission[]
-  leaderboard        Boolean             @default(false)
-}
-
-model ContestProblem {
-  id        String   @id @default(cuid())
-  contestId String
-  problemId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  contest   Contest  @relation(fields: [contestId], references: [id])
-  problem   Problem  @relation(fields: [problemId], references: [id])
-  index     Int
-  solved    Int      @default(0)
-
-  @@unique([contestId, problemId])
-  @@index([problemId])
-}
-
 model Problem {
   id                 String              @id @default(cuid())
   title              String
@@ -111,7 +81,7 @@ model Submission {
   memory            Int?
   time              Float?
   activeContest     Contest?           @relation(fields: [activeContestId], references: [id])
-  user              User?              @relation(fields: [userId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
   language          Language           @relation(fields: [languageId], references: [id])
   problem           Problem            @relation(fields: [problemId], references: [id])
   ContestSubmission ContestSubmission?
@@ -151,32 +121,68 @@ model TestCase {
   @@index([status]) // For status filtering
 }
 
+model Contest {
+  id                 String              @id @default(cuid())
+  title              String
+  description        String?
+  startTime          DateTime
+  endTime            DateTime
+  hidden             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  submissions        Submission[]
+  problem            ContestProblem[]
+  contestsubmissions ContestSubmission[]
+  contestPoints     ContestPoints[]
+  leaderboard        Boolean             @default(false)
+}
+
+model ContestProblem {
+  id        String   @id @default(cuid())
+  contestId String
+  problemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  index     Int
+  solved    Int      @default(0)
+  points    Int      @default(100)
+
+  @@unique([contestId, problemId])
+  @@index([problemId])
+}
+
 model ContestSubmission {
   id           String     @id @default(cuid())
   userId       String
   problemId    String
   contestId    String
   submissionId String     @unique
-  submission   Submission @relation(fields: [submissionId], references: [id])
   points       Int
-  user         User       @relation(fields: [userId], references: [id])
-  problem      Problem    @relation(fields: [problemId], references: [id])
-  contest      Contest    @relation(fields: [contestId], references: [id])
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem      Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  contest      Contest    @relation(fields: [contestId], references: [id], onDelete: Cascade)
 
   @@unique([userId, problemId, contestId])
   @@index([contestId])
 }
 
 model ContestPoints {
-  id        String @id @default(cuid())
-  contestId String
-  userId    String
-  points    Int
-  rank      Int
-  user      User   @relation(fields: [userId], references: [id])
+  id                         String   @id @default(cuid())
+  contestId                  String
+  userId                     String
+  points                     Int
+  rank                       Int
+  lastSuccessfulSubmissionAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
 
   @@unique([contestId, userId])
-  @@index([contestId, points])
+  // UPDATE THIS INDEX FOR THE LEADERBOARD QUERY:
+  @@index([contestId, points(sort: Desc), lastSuccessfulSubmissionAt(sort: Asc)])
 }
 
 enum TestCaseResult {
