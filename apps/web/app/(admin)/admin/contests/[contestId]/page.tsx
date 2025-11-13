@@ -2,35 +2,52 @@
 
 import { db } from '@repo/db';
 import { notFound } from 'next/navigation';
-import { EditContestForm } from './_components/EditContestForm';
+import { ContestDetailsSection } from './_components/ContestDetailsSection';
 import { PublishControls } from './_components/PublishControls';
 import { DeleteContestButton } from './_components/DeleteContestButton';
 import { ManageContestProblems } from './_components/ManageContestProblems';
+import { ErrorBoundary } from '../_components/ErrorBoundary';
 import { JSX } from 'react';
 
 /**
  * Main workspace page for editing a single contest.
+ * 
+ * Optimization: Single query with all needed relations to prevent N+1 issues
  */
 export default async function ManageContestPage({
   params,
 }: {
   params: { contestId: string };
 }) : Promise<JSX.Element> {
-  // Fetch contest data. We use findUniqueOrThrow
-  // to automatically handle not found cases.
+  // Fetch contest data with all required relations in a single query
   const parameter = await params;
   let contest;
   try {
     contest = await db.contest.findUniqueOrThrow({
-      where: { id: parameter.contestId },
+      where: { 
+        id: parameter.contestId,
+      },
       include: {
         problem: {
-          // This include is for Phase 4
-          include: { problem: true },
+          include: { 
+            problem: true, // Include full problem object for compatibility
+          },
           orderBy: { index: 'asc' },
+        },
+        _count: {
+          select: {
+            problem: true,
+            submissions: true,
+          },
         },
       },
     });
+    
+    // FIX: Check if contest is soft-deleted
+    if (contest.deletedAt) {
+      console.error('Contest is deleted:', parameter.contestId);
+      notFound(); // Triggers 404 page
+    }
   } catch (error) {
     console.error('Error fetching contest:', error);
     notFound(); // Triggers 404 page
@@ -50,22 +67,30 @@ export default async function ManageContestPage({
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Left Column (Settings) */}
         <div className="space-y-8 lg:col-span-2">
-          <EditContestForm contest={contest} />
+          <ErrorBoundary>
+            <ContestDetailsSection contest={contest} />
+          </ErrorBoundary>
 
-          {/* This will be the problem manager in Phase 4 */}
-          <ManageContestProblems
-            contestId={contest.id}
-            problems={contest.problem}
-          />
+          <ErrorBoundary>
+            {/* Problem manager */}
+            <ManageContestProblems
+              contestId={contest.id}
+              problems={contest.problem}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Right Column (Controls) */}
         <div className="space-y-6 lg:col-span-1">
-          <PublishControls
-            contestId={contest.id}
-            isHidden={contest.hidden}
-          />
-          <DeleteContestButton contestId={contest.id} />
+          <ErrorBoundary>
+            <PublishControls
+              contestId={contest.id}
+              isHidden={contest.hidden}
+            />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <DeleteContestButton contestId={contest.id} />
+          </ErrorBoundary>
         </div>
       </div>
     </div>

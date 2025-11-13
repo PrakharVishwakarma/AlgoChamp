@@ -38,7 +38,7 @@ export function ProblemSearchModal({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Problem[] | null>(null);
   const [isSearching, startSearchTransition] = useTransition();
-  const debouncedQuery = useDebounce(query, 300);
+  const debouncedQuery = useDebounce(query, 500);
 
   // Effect to search when debounced query changes
   useEffect(() => {
@@ -153,6 +153,7 @@ function SearchResultRow({
         variant={isAlreadyAdded ? 'success' : 'secondary'}
         onClick={handleAdd}
         disabled={isAdding || isAlreadyAdded}
+        className='flex items-center gap-1'
       >
         {isAdding ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

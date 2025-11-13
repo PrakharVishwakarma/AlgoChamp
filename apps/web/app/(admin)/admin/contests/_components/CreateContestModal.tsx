@@ -44,6 +44,12 @@ export function CreateContestModal() {
 
   const { showFlashMessage } = useFlashMessageActions();
 
+  // Calculate min datetime (now) for date inputs
+  const now = new Date();
+  const minDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
   useEffect(() => {
     if (state.error) {
       showFlashMessage('error', state.error);
@@ -52,7 +58,7 @@ export function CreateContestModal() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button onClick={() => setIsOpen(true)} className='flex items-center gap-2'>
         <Plus className="mr-2 h-4 w-4" />
         Create Contest
       </Button>
@@ -83,6 +89,11 @@ export function CreateContestModal() {
                   name="description"
                   placeholder="What is this contest about?"
                 />
+                {state.fieldErrors?.description && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {state.fieldErrors.description[0]}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="startTime">Start Time</Label>
@@ -90,8 +101,12 @@ export function CreateContestModal() {
                   id="startTime"
                   name="startTime"
                   type="datetime-local"
+                  min={minDateTime}
                   required
                 />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Contest must start in the future
+                </p>
                 {state.fieldErrors?.startTime && (
                   <p className="mt-1 text-sm text-red-500">
                     {state.fieldErrors.startTime[0]}
@@ -104,8 +119,12 @@ export function CreateContestModal() {
                   id="endTime"
                   name="endTime"
                   type="datetime-local"
+                  min={minDateTime}
                   required
                 />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Duration: 15 min - 30 days from start
+                </p>
                 {state.fieldErrors?.endTime && (
                   <p className="mt-1 text-sm text-red-500">
                     {state.fieldErrors.endTime[0]}
@@ -137,7 +156,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending} className='flex items-center gap-2'>
       {pending ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (

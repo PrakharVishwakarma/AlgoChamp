@@ -2,13 +2,17 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import type { ContestProblem, Problem } from '@prisma/client';
 import { Button } from '@repo/ui/button';
 import { Plus } from 'lucide-react';
-import { ProblemSearchModal } from './ProblemSearchModal';
 import { ContestProblemRow } from './ContestProblemRow';
 import { AdminEmptyState } from '../../_components/AdminEmptyState';
+
+// Lazy load the heavy ProblemSearchModal component
+const ProblemSearchModal = lazy(() => 
+  import('./ProblemSearchModal').then(mod => ({ default: mod.ProblemSearchModal }))
+);
 
 // Define the type for the problem prop, which includes the nested Problem
 type ContestProblemWithDetails = ContestProblem & {
@@ -23,6 +27,8 @@ interface ManageContestProblemsProps {
 /**
  * The main container for managing a contest's problem set.
  * It lists problems and contains the "Add Problem" modal.
+ * 
+ * Performance: ProblemSearchModal is lazy loaded to reduce initial bundle size
  */
 export function ManageContestProblems({
   contestId,
@@ -40,8 +46,7 @@ export function ManageContestProblems({
               Add, remove, and set points for problems in this contest.
             </p>
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={() => setIsModalOpen(true)} icon={Plus}>
             Add Problem
           </Button>
         </div>
@@ -55,27 +60,48 @@ export function ManageContestProblems({
               />
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {problems.map((cp, index) => (
-                <ContestProblemRow
-                  key={cp.id}
-                  contestProblem={cp}
-                  index={index}
-                />
-              ))}
-            </div>
+            <>
+              {/* Fix #7: Table Headers */}
+              <div className="hidden border-b bg-muted/50 px-6 py-3 sm:grid sm:grid-cols-[auto_1fr_auto_auto] sm:items-center sm:gap-4">
+                <div className="w-5" aria-label="Drag handle column" />
+                <div className="text-sm font-semibold text-muted-foreground">
+                  Problem
+                </div>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  Points
+                </div>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  Actions
+                </div>
+              </div>
+              
+              {/* Problem Rows */}
+              <div className="divide-y divide-border">
+                {problems.map((cp, index) => (
+                  <ContestProblemRow
+                    key={cp.id}
+                    contestProblem={cp}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* The Modal for searching and adding problems */}
-      <ProblemSearchModal
-        isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        contestId={contestId}
-        // Pass existing problem IDs to prevent adding duplicates
-        existingProblemIds={problems.map((cp) => cp.problemId)}
-      />
+      {/* The Modal for searching and adding problems - Lazy loaded */}
+      {isModalOpen && (
+        <Suspense fallback={null}>
+          <ProblemSearchModal
+            isOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            contestId={contestId}
+            // Pass existing problem IDs to prevent adding duplicates
+            existingProblemIds={problems.map((cp) => cp.problemId)}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -39,6 +39,7 @@ model Problem {
   solved             Int                 @default(0)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
   difficulty         Difficulty          @default(EASY)
   totalSubmissions   Int                 @default(0)
   contests           ContestProblem[]
@@ -51,6 +52,7 @@ model Problem {
   @@index([totalSubmissions]) // For sorting by submission count
   @@index([hidden, difficulty]) // For filtered queries
   @@index([createdAt]) // For sorting by creation time
+  @@index([deletedAt]) // For soft delete queries
 }
 
 model DefaultCode {
@@ -130,11 +132,19 @@ model Contest {
   hidden             Boolean             @default(true)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
   submissions        Submission[]
   problem            ContestProblem[]
   contestsubmissions ContestSubmission[]
   contestPoints     ContestPoints[]
   leaderboard        Boolean             @default(false)
+
+  // Performance indexes for admin queries
+  @@index([hidden, startTime(sort: Desc)]) // For filtering and sorting contests
+  @@index([createdAt(sort: Desc)]) // For recent contests
+  @@index([startTime, endTime]) // For date range queries
+  @@index([hidden, createdAt(sort: Desc)]) // For admin list view
+  @@index([deletedAt]) // For soft delete queries
 }
 
 model ContestProblem {
@@ -151,6 +161,7 @@ model ContestProblem {
 
   @@unique([contestId, problemId])
   @@index([problemId])
+  @@index([contestId, index]) // Critical for ordered problem lists
 }
 
 model ContestSubmission {
@@ -167,6 +178,8 @@ model ContestSubmission {
 
   @@unique([userId, problemId, contestId])
   @@index([contestId])
+  @@index([userId, contestId]) // For user's contest submissions
+  @@index([contestId, problemId]) // For problem-specific submissions
 }
 
 model ContestPoints {

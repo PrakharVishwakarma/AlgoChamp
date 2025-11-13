@@ -7,13 +7,21 @@ import { AdminEmptyState } from './AdminEmptyState';
 /**
  * Fetches and displays the list of all contests.
  * This is a separate Server Component to allow streaming with Suspense.
+ * 
+ * Optimization: Single query with counts to prevent N+1 issues
  */
 export async function ContestList() {
     const contests = await db.contest.findMany({
+        where: {
+            deletedAt: null, // FIX: Exclude soft-deleted contests
+        },
         orderBy: { startTime: 'desc' },
         include: {
             _count: {
-                select: { problem: true }, // Count problems in each contest
+                select: { 
+                    problem: true,      // Count problems in each contest
+                    submissions: true,  // Count submissions for analytics
+                },
             },
         },
     });
