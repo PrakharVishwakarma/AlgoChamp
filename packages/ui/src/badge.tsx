@@ -1,4 +1,5 @@
-// /apps/web/app/(admin)/admin/contests/_components/Badge.tsx
+// /packages/ui/src/badge.tsx
+'use client'; // Components in packages/ui are client components
 
 import * as React from 'react';
 
@@ -16,8 +17,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * A simple, manual Badge component created locally for the admin workspace.
- * It does not use cva or tailwind-merge.
+ * A simple, manual Badge component, now centralized in the UI package.
  */
 function Badge({ className, variant = 'default', ...props }: BadgeProps) {
   // Base classes for all badges
@@ -28,7 +28,9 @@ function Badge({ className, variant = 'default', ...props }: BadgeProps) {
   const variantClasses = variantStyles[variant] || variantStyles.default;
 
   // Combine them all
-  const combinedClasses = `${baseClasses} ${variantClasses} ${className || ''}`;
+  const combinedClasses = `${baseClasses} ${variantClasses} ${
+    className || ''
+  }`;
 
   return <div className={combinedClasses} {...props} />;
 }

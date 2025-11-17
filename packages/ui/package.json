@@ -12,7 +12,8 @@
     "./input": "./src/Input.tsx",
     "./textarea": "./src/Textarea.tsx",
     "./modal": "./src/Modal.tsx",
-    "./switch": "./src/switch.tsx"
+    "./switch": "./src/switch.tsx",
+    "./badge": "./src/badge.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

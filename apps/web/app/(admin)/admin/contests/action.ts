@@ -202,6 +202,7 @@ export async function createContest(
 
   // 5. Revalidate and Redirect
   revalidatePath('/admin/contests');
+  revalidatePath('/contests'); 
   redirect(`/admin/contests/${newContest.id}`);
 }
 
@@ -327,6 +328,7 @@ export async function updateContest(
 
   // 6. Revalidate (Fix #5: Don't use redirect() - return success state instead)
   revalidatePath('/admin/contests');
+  revalidatePath('/contests');
   revalidatePath(`/admin/contests/${contestId}`);
   
   // Return success state (error: null indicates success)
@@ -408,6 +410,7 @@ export async function toggleContestVisibility(
 
     // Revalidate all paths where visibility matters
     revalidatePath('/admin/contests');
+    revalidatePath('/contests');
     revalidatePath(`/admin/contests/${contestId}`);
     revalidatePath('/contests'); // The public user-facing page
 
@@ -504,6 +507,9 @@ export async function deleteContest(contestId: string): Promise<{ error: string 
   }
 
   revalidatePath('/admin/contests');
+  revalidatePath('/contests');
+  revalidatePath(`/admin/contests/${contestId}`);
+  revalidatePath(`/contests/${contestId}`);
   redirect('/admin/contests');
 }
 
@@ -663,6 +669,7 @@ export async function addProblemToContest(
 
     // Revalidate
     revalidatePath(`/admin/contests/${contestId}`);
+    revalidatePath(`/contests/${contestId}`);
     return { error: null };
   } catch (dbError) {
     // Handle specific error types
@@ -789,6 +796,7 @@ export async function removeProblemFromContest(
 
     // 6. Revalidate
     revalidatePath(`/admin/contests/${contestProblem.contestId}`);
+    revalidatePath(`/contests/${contestProblem.contestId}`);
     return { error: null };
   } catch (dbError) {
     console.error('[REMOVE_PROBLEM_ERROR]', dbError);
@@ -891,6 +899,7 @@ export async function updateProblemPoints(
 
     // 6. Revalidate
     revalidatePath(`/admin/contests/${updated.contestId}`);
+    revalidatePath(`/contests/${updated.contestId}`);
     return { error: null };
   } catch (dbError) {
     console.error('[UPDATE_POINTS_ERROR]', dbError);

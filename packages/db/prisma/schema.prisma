@@ -145,6 +145,10 @@ model Contest {
   @@index([startTime, endTime]) // For date range queries
   @@index([hidden, createdAt(sort: Desc)]) // For admin list view
   @@index([deletedAt]) // For soft delete queries
+  
+  // Performance indexes for user contest discovery (/contests page)
+  @@index([hidden, deletedAt, startTime]) // For Live/Upcoming contests filtering
+  @@index([hidden, deletedAt, endTime(sort: Desc)]) // For Past contests sorted by end time
 }
 
 model ContestProblem {

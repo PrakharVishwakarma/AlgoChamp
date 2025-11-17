@@ -1,6 +1,6 @@
 // /apps/web/app/(admin)/admin/contests/_components/ContestStatusBadge.tsx
 
-import { Badge } from "./Badge";
+import {Badge} from '@repo/ui/badge';
 
 interface ContestStatusBadgeProps {
   hidden: boolean;
