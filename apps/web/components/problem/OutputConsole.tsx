@@ -2,7 +2,7 @@
 
 "use client";
 
-import type { RunResult } from "../action"; // Import RunResult type
+import type { RunResult } from "../../app/problems/[slug]/action"; // Import RunResult type
 import { CheckCircle2, XCircle, AlertTriangle, Clock, ServerCrash, Loader2, MinusCircle, BrainCircuit } from "lucide-react"; // Loading spinner icon
 import { useState } from 'react';
 import { SubmissionStatus } from '@prisma/client';

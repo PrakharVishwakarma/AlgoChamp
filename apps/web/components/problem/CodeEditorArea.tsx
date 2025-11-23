@@ -15,16 +15,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 
-import { runCode, type RunResult } from '../action';
+import { runCode, type RunResult } from '../../app/problems/[slug]/action';
 import { useShowFlashMessage } from '@/context/FlashMessageContext';
 import { LANGUAGE_MAPPING } from '@repo/common/language';
 import type { SubmissionResultState } from './ProblemWorkspace';
-import { useAutoSave } from '../_hooks/useAutoSave';
-import { useEditorSettings } from '../_context/EditorSettingsContext';
+import { useAutoSave } from '../../hooks/useAutoSave';
+import { useEditorSettings } from '../../context/EditorSettingsContext';
 import { EditorSettingsPanel } from './EditorSettingsPanel';
 import { EditorSkeleton } from './EditorSkeleton';
 import { EditorErrorBoundary } from './EditorErrorBoundary';
-import { Tooltip } from './Tooltip';
+import { Tooltip } from '../common/Tooltip';
 
 const Editor = dynamic(() => import('@monaco-editor/react'), {
     ssr: false,

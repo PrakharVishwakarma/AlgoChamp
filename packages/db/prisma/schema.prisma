@@ -16,18 +16,19 @@ datasource db {
 }
 
 model User {
-  id                  String              @id @default(cuid())
-  email               String              @unique
+  id                  String                    @id @default(cuid())
+  email               String                    @unique
   firstName           String?
   lastName            String?
   password            String
   token               String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
   contestsSubmissions ContestSubmission[]
-  role                UserRole            @default(USER)
+  role                UserRole                  @default(USER)
   submissions         Submission[]
   contestsPoints      ContestPoints[]
+  contestRegistrations UserContestRegistration[] // Contest registrations
 }
 
 model Problem {
@@ -124,20 +125,23 @@ model TestCase {
 }
 
 model Contest {
-  id                 String              @id @default(cuid())
+  id                 String                    @id @default(cuid())
   title              String
   description        String?
   startTime          DateTime
   endTime            DateTime
-  hidden             Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  hidden             Boolean                   @default(true)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
   deletedAt          DateTime?
+  allowVirtual       Boolean                   @default(false) // Allow virtual participation after end
+  maxParticipants    Int?                      // Max participants (null = unlimited)
   submissions        Submission[]
   problem            ContestProblem[]
   contestsubmissions ContestSubmission[]
-  contestPoints     ContestPoints[]
-  leaderboard        Boolean             @default(false)
+  contestPoints      ContestPoints[]
+  registrations      UserContestRegistration[] // Explicit registration tracking
+  leaderboard        Boolean                   @default(false)
 
   // Performance indexes for admin queries
   @@index([hidden, startTime(sort: Desc)]) // For filtering and sorting contests
@@ -175,6 +179,8 @@ model ContestSubmission {
   contestId    String
   submissionId String     @unique
   points       Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   problem      Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
@@ -184,6 +190,7 @@ model ContestSubmission {
   @@index([contestId])
   @@index([userId, contestId]) // For user's contest submissions
   @@index([contestId, problemId]) // For problem-specific submissions
+  @@index([userId, contestId, createdAt(sort: Desc)]) // For contest submission history
 }
 
 model ContestPoints {
@@ -193,13 +200,35 @@ model ContestPoints {
   points                     Int
   rank                       Int
   lastSuccessfulSubmissionAt DateTime
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
 
   @@unique([contestId, userId])
-  // UPDATE THIS INDEX FOR THE LEADERBOARD QUERY:
+  // Leaderboard query optimization: ordered by points desc, then by timestamp asc
   @@index([contestId, points(sort: Desc), lastSuccessfulSubmissionAt(sort: Asc)])
+}
+
+model UserContestRegistration {
+  id           String   @id @default(cuid())
+  userId       String
+  contestId    String
+  registeredAt DateTime @default(now())
+  isVirtual    Boolean  @default(false) // Track virtual vs official participation
+  startedAt    DateTime? // When user started (for virtual contests)
+  endedAt      DateTime? // When user finished (for virtual contests)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contestId])
+  @@index([contestId, isVirtual]) // Filter official vs virtual participants
+  @@index([userId, registeredAt(sort: Desc)]) // User's registration history
+  @@index([contestId, registeredAt(sort: Asc)]) // Registration order
 }
 
 enum TestCaseResult {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Copy, Check, Loader2 } from 'lucide-react';
-import { getSubmissionCode } from '../action';
+import { getSubmissionCode } from '../../app/problems/[slug]/action';
 
 interface SubmissionCodeModalProps {
     submissionId: string;

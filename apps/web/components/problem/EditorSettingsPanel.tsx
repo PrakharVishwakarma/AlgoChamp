@@ -2,7 +2,7 @@
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useEditorSettings, type EditorTheme, type EditorFontSize, type EditorTabSize } from '../_context/EditorSettingsContext';
+import { useEditorSettings, type EditorTheme, type EditorFontSize, type EditorTabSize } from '../../context/EditorSettingsContext';
 
 /**
  * Settings panel for customizing the code editor

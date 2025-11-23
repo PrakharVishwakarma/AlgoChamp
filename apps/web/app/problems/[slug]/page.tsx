@@ -47,7 +47,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { db } from "@repo/db";
 import { ClientNavigation } from "@/components/ClientNavigation";
-import { ProblemWorkspace } from './_components/ProblemWorkspace';
+import { ProblemWorkspace } from '../../../components/problem/ProblemWorkspace';
 import { Difficulty } from '@prisma/client';
 
 // ✅ ISR Configuration: Cache for 1 hour

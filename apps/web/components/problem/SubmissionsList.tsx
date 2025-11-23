@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSubmissions, type SubmissionHistoryItem } from '../action';
+import { getSubmissions, type SubmissionHistoryItem } from '../../app/problems/[slug]/action';
 import { Loader2, CheckCircle2, XCircle, AlertTriangle, Clock, Code } from 'lucide-react';
 import { SubmissionStatus } from '@prisma/client';
 import { SubmissionCodeModal } from './SubmissionCodeModal';

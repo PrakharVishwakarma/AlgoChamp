@@ -1,7 +1,6 @@
 // /packages/db/prisma/updateQuestion.ts 
 
 // import { LANGUAGE_MAPPING } from '../../common/src/language';
-
 import fs from 'fs';
 
 import { db } from '../src/index';

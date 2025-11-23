@@ -3,19 +3,19 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ProblemDescription } from './ProblemDescription';
 import { CodeEditorArea } from './CodeEditorArea';
-import { Difficulty } from '@prisma/client';
 import { OutputConsole } from './OutputConsole';
-import { RunResult } from '../action';
+import { Difficulty } from '@prisma/client';
+import { RunResult } from '../../app/problems/[slug]/action';
 import { LANGUAGE_MAPPING } from '@repo/common/language';
 import { SubmissionStatus } from "@prisma/client";
 import { SubmissionsList } from './SubmissionsList';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { EditorSettingsProvider } from '../_context/EditorSettingsContext';
+import { EditorSettingsProvider } from '../../context/EditorSettingsContext';
 import axios from 'axios';
 
 export type TabName = 'testCases' | 'runResult' | 'submitResult';
 
-interface ProblemData {
+export interface ProblemData {
     id: string;
     slug: string;
     title: string;
@@ -45,7 +45,7 @@ const getInitialLanguage = (slug: string): SupportedLanguage => {
     return 'cpp';
 };
 
-const getInitialCode = (lang: SupportedLanguage, boilerplates: Record<string, string>): string => {
+export const getInitialCode = (lang: SupportedLanguage, boilerplates: Record<string, string>): string => {
     const mappedKey = LANGUAGE_MAPPING[lang]?.internal;
     if (mappedKey && mappedKey in boilerplates) {
         return boilerplates[mappedKey] || '';
@@ -53,18 +53,18 @@ const getInitialCode = (lang: SupportedLanguage, boilerplates: Record<string, st
     return '';
 };
 
-const FINAL_SUBMISSION_STATES: (SubmissionStatus | string)[] = [
+export const FINAL_SUBMISSION_STATES: (SubmissionStatus | string)[] = [
     SubmissionStatus.AC,
     SubmissionStatus.REJECTED,
     SubmissionStatus.COMPILATION_ERROR,
     SubmissionStatus.TLE,
     "Error",
-    "Network Error",
+    "Network Erro   r",
     "Timeout", // ✅ NEW: Timeout is final state
 ];
 
 // ✅ NEW: Polling configuration
-const POLLING_CONFIG = {
+export const POLLING_CONFIG = {
     INTERVAL_MS: 2000,        // Poll every 2 seconds
     MAX_DURATION_MS: 20000,   // Stop after 20 seconds
     MAX_ATTEMPTS: 10          // 20s / 2s = 10 attempts
@@ -100,6 +100,7 @@ export function ProblemWorkspace({ problemData }: { problemData: ProblemData }) 
         }
     }, []);
 
+    // Save Language preference 
     useEffect(() => {
         localStorage.setItem(`editorLanguage-${slug}`, currentLanguage);
     }, [currentLanguage, slug]);
