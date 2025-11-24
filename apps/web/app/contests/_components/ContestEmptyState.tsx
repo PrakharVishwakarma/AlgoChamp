@@ -1,5 +1,5 @@
 import React from "react";
-import { ContestStatus } from "./StatusBadge";
+import { ContestStatus } from "../../../components/common/StatusBadge";
 
 interface ContestEmptyStateProps {
   status: ContestStatus;

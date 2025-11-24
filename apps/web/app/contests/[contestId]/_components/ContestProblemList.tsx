@@ -18,7 +18,7 @@ interface ContestProblemListProps {
 
 export function ContestProblemList({ contestId, problems, isEnded = false }: ContestProblemListProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 my-8">
       <h2 className="text-2xl font-bold text-foreground">Problems</h2>
       <div className="rounded-lg border bg-card shadow-sm">
         <div className="divide-y divide-border">

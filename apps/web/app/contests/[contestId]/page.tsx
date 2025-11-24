@@ -9,9 +9,10 @@ import { ContestCountdown } from './_components/ContestCountdown';
 import { ContestProblemList } from './_components/ContestProblemList';
 import { RegisterOnMount } from './_components/RegisterOnMount';
 import { ContestLeaderboard } from './_components/ContestLeaderboard';
+import { ContestRules } from './_components/ContestRules';
 import type { Prisma, Contest } from '@prisma/client';
-import type { Metadata } from 'next';
-
+import type { Metadata } from 'next'; 
+import { ClientNavigation } from '@/components/ClientNavigation';
 // Force dynamic rendering to ensure time-based states are always accurate
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ type ContestProblemWithProblem = Prisma.ContestProblemGetPayload<{
     };
 }>;
 
-type ContestWithDetails = Pick<Contest, 'id' | 'title' | 'description' | 'startTime' | 'endTime' | 'hidden' | 'deletedAt' | 'leaderboard' | 'createdAt' | 'updatedAt'>;
+type ContestWithDetails = Pick<Contest, 'id' | 'title' | 'description' | 'startTime' | 'endTime' | 'hidden' | 'deletedAt' | 'leaderboard' | 'createdAt' | 'updatedAt' | 'allowVirtual' | 'maxParticipants'>;
 
 // SEO Metadata Generation
 export async function generateMetadata({ params }: ContestPageProps): Promise<Metadata> {
@@ -90,6 +91,10 @@ export default async function ContestPage({ params }: ContestPageProps) {
                 hidden: true,
                 deletedAt: true,
                 leaderboard: true,
+                allowVirtual: true,
+                maxParticipants: true,
+                createdAt: true,
+                updatedAt: true,
             },
         }) as Promise<ContestWithDetails | null>,
         getServerSession(authOptions),
@@ -155,12 +160,12 @@ export default async function ContestPage({ params }: ContestPageProps) {
         // Count solved problems
         const userName = entry.user.firstName && entry.user.lastName
             ? `${entry.user.firstName} ${entry.user.lastName}`
-            : entry.user.email.split('@')[0];
+            : (entry.user.email?.split('@')[0] || 'Anonymous');
 
         return {
             rank: index + 1, // Recalculate rank based on sort order
             userId: entry.userId,
-            userName,
+            userName: userName, // Explicitly ensure it's a string
             points: entry.points,
             solvedCount: Math.floor(entry.points / 100), // Assuming 100 points per problem
             lastSubmissionTime: entry.lastSuccessfulSubmissionAt,
@@ -169,6 +174,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
 
     return (
         <div className="min-h-screen bg-background">
+            <ClientNavigation />
             <main className="container mx-auto max-w-5xl px-4 py-12">
                 {/* 1. The Auto-Pilot: Register user if logged in and contest is active */}
                 {isLoggedIn && (isUpcoming || isLive) && (
@@ -180,6 +186,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
                     contest={contest}
                     status={isUpcoming ? 'Upcoming' : isLive ? 'Live' : 'Ended'}
                 />
+
 
                 <div className="space-y-10">
                     {/* 3. State Machine UI */}
@@ -256,6 +263,8 @@ export default async function ContestPage({ params }: ContestPageProps) {
                         </div>
                     )}
                 </div>
+            {/* 3. Contest Rules - Always visible */}
+            <ContestRules />
             </main>
         </div>
     );
